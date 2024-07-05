@@ -8,29 +8,20 @@ import json
 import datetime
 import matplotlib.pyplot as plt
 from io import BytesIO
-
+from utils import data_to_excel
 
 max_days = 7400
 min_days = 3
 
-@st.cache(suppress_st_warning=True, show_spinner=False)
-def to_excel(df):
-    """Make an excel object out of a dataframe as an IO-object"""
-    output = BytesIO()
-    writer = pd.ExcelWriter(output, engine='openpyxl')
-    df.to_excel(writer, index=True, sheet_name='Sheet1')
-    worksheet = writer.sheets['Sheet1']
-    writer.save()
-    processed_data = output.getvalue()
-    return processed_data
 
 
-@st.cache(suppress_st_warning=True, show_spinner = False)
+
+@st.cache_data(show_spinner = False)
 def titles():
     b = pd.read_csv('titles.csv')
     return list(b.title)
 
-@st.cache(suppress_st_warning=True, show_spinner = False)
+@st.cache_data(show_spinner = False)
 def sumword(words, period, title = None):
     wordlist =   [x.strip() for x in words.split(',')]
     # check if trailing comma, or comma in succession, if so count comma in
@@ -46,7 +37,7 @@ def sumword(words, period, title = None):
     return ref
 
 
-@st.cache(suppress_st_warning=True, show_spinner = False)
+@st.cache_data(show_spinner = False)
 def ngram(word, mid_date, sammenlign, title = None):
     #st.write('innom')
     period = ((mid_date - datetime.timedelta(days = max_days)).strftime("%Y%m%d"),
@@ -64,7 +55,7 @@ def ngram(word, mid_date, sammenlign, title = None):
         res = pd.DataFrame()
     return res
 
-@st.cache(suppress_st_warning = True, show_spinner = False)
+@st.cache_data(show_spinner = False)
 def adjust(df, date, days, smooth):
     res = df
     
@@ -185,7 +176,7 @@ colf, col2 = st.columns([2,8])
 with colf:
     filnavn = st.text_input("Last ned data i excelformat", "dagsplott.xlsx", help="Filen blir sannsynligvis liggende i nedlastningsmappen - endre gjerne på filnavnet, men behold .xlsx")
 
-if st.download_button(f'Klikk for å laste ned til {filnavn}', to_excel(df), filnavn, help = "Åpnes i Excel eller tilsvarende"):
+if st.download_button(f'Klikk for å laste ned til {filnavn}', data_to_excel(df), filnavn, help = "Åpnes i Excel eller tilsvarende"):
     pass
 
 
